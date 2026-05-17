@@ -77,6 +77,22 @@ If any of these matter to you before they ship, open an issue.
 - Does not catch credentials (use `gitleaks` + `trufflehog` for that — leakguard runs alongside them, not instead).
 - Does not rewrite git history (use `git-filter-repo` for that, after leakguard catches the prose).
 
+## Related tools
+
+leakguard is one layer of a three-tool stack for maintaining public OSS repos with private context:
+
+| Tool | Concern | When to install |
+|---|---|---|
+| **leakguard** (this tool) | Narrative-leak detection in file CONTENT (prose patterns, codenames) | Anywhere you write prose that could leak operator-internal context |
+| [**oss-twin**](https://github.com/creatornader/oss-twin) | Structural mirror gate — fails if any path declared private exists in the public tree | When you have a `*-internal` mirror repo |
+| [**oss-security-scan**](https://github.com/creatornader/oss-security-scan) | Reusable GitHub Actions workflow (typos + gitleaks + trufflehog + osv-scanner) | Every public OSS repo |
+
+For the full stack wire-up pattern (one repo, all three tools), see [`oss-security-scan/examples/full-stack-starter/`](https://github.com/creatornader/oss-security-scan/tree/main/examples/full-stack-starter).
+
+## Note for repos with prose linters
+
+`leakguard.yaml` lists codenames as REGEX PATTERN VALUES (e.g. `- '\bmyproject\b'`). It defines what to catch, not what to mention. If your repo also runs a prose linter (Vale, an LLM-based audit, etc.), exempt `leakguard.yaml` from those scanners — otherwise the linter will flag the pattern strings as if they were narrative leaks. Same applies to [`.oss-twin.yaml`](https://github.com/creatornader/oss-twin).
+
 ## License
 
 Apache 2.0. See [LICENSE](LICENSE).
