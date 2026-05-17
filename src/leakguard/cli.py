@@ -27,6 +27,13 @@ def main(argv: list[str] | None = None) -> int:
         default=Path("leakguard.yaml"),
         help="User catalog path (default: ./leakguard.yaml; merged on top of starter)",
     )
+    scan_p.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="Glob pattern of files to skip (repeatable). Stacks with `ignore_paths` from the catalog.",
+    )
     scan_p.add_argument("--format", choices=["text", "json"], default="text")
     scan_p.add_argument("--quiet", action="store_true", help="Suppress summary line")
 
@@ -48,9 +55,10 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _cmd_scan(args) -> int:
-    classes = load_with_overrides(args.catalog)
+    catalog = load_with_overrides(args.catalog)
     paths = [Path(p) for p in args.paths]
-    findings = scan_paths(paths, classes)
+    ignore_patterns = list(catalog.ignore_paths) + list(args.exclude)
+    findings = scan_paths(paths, catalog.classes, ignore_patterns=ignore_patterns)
 
     if args.format == "json":
         out = [
@@ -90,9 +98,13 @@ def _cmd_init(args) -> int:
 
 
 def _cmd_list(args) -> int:
-    classes = load_with_overrides(args.catalog)
-    for cls in classes:
+    catalog = load_with_overrides(args.catalog)
+    for cls in catalog.classes:
         n = len(cls.get("patterns", []))
         marker = " (no patterns)" if n == 0 else f" ({n} pattern{'s' if n != 1 else ''})"
         print(f"{cls['id']}: {cls['name']}{marker}")
+    if catalog.ignore_paths:
+        print(f"\nignore_paths: {len(catalog.ignore_paths)} pattern(s)")
+        for p in catalog.ignore_paths:
+            print(f"  - {p}")
     return 0

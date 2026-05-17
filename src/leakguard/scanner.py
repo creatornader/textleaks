@@ -1,5 +1,6 @@
 """Core scanner: walk paths, match catalog patterns line-by-line, return findings."""
 
+import fnmatch
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,6 +26,8 @@ SKIP_DIRS = frozenset({
     ".mypy_cache",
 })
 
+SKIP_DIR_SUFFIXES = frozenset({".egg-info"})
+
 SKIP_SUFFIXES = frozenset({
     ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".svg",
     ".pdf", ".zip", ".tar", ".gz", ".tgz", ".bz2", ".xz", ".7z",
@@ -45,21 +48,42 @@ class Finding:
 
 
 def _should_skip(path: Path) -> bool:
-    if any(part in SKIP_DIRS for part in path.parts):
+    parts = path.parts
+    if any(part in SKIP_DIRS for part in parts):
+        return True
+    if any(part.endswith(suffix) for part in parts for suffix in SKIP_DIR_SUFFIXES):
         return True
     if path.suffix.lower() in SKIP_SUFFIXES:
         return True
     return False
 
 
-def _iter_files(paths: Iterable[Path]) -> Iterable[Path]:
+def _matches_ignore(path: Path, patterns: list[str]) -> bool:
+    """True if `path` matches any glob pattern (matched against the path
+    relative to cwd, falling back to the absolute path, and against the
+    basename for simple-name patterns)."""
+    if not patterns:
+        return False
+    cwd = Path.cwd().resolve()
+    try:
+        rel = path.resolve().relative_to(cwd).as_posix()
+    except ValueError:
+        rel = path.as_posix()
+    name = path.name
+    for pat in patterns:
+        if fnmatch.fnmatch(rel, pat) or fnmatch.fnmatch(name, pat):
+            return True
+    return False
+
+
+def _iter_files(paths: Iterable[Path], ignore_patterns: list[str]) -> Iterable[Path]:
     for p in paths:
         if p.is_file():
-            if not _should_skip(p):
+            if not _should_skip(p) and not _matches_ignore(p, ignore_patterns):
                 yield p
         elif p.is_dir():
             for f in p.rglob("*"):
-                if f.is_file() and not _should_skip(f):
+                if f.is_file() and not _should_skip(f) and not _matches_ignore(f, ignore_patterns):
                     yield f
 
 
@@ -99,9 +123,14 @@ def scan_file(path: Path, compiled_classes: list) -> list[Finding]:
     return findings
 
 
-def scan_paths(paths: Iterable[Path], classes: list) -> list[Finding]:
+def scan_paths(
+    paths: Iterable[Path],
+    classes: list,
+    ignore_patterns: Iterable[str] = (),
+) -> list[Finding]:
     compiled = _compile_classes(classes)
+    ignore_list = list(ignore_patterns)
     out: list[Finding] = []
-    for f in _iter_files(paths):
+    for f in _iter_files(paths, ignore_list):
         out.extend(scan_file(f, compiled))
     return out

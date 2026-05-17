@@ -1,0 +1,27 @@
+# leakguard's own config.
+#
+# This file makes `leakguard scan .` clean on the leakguard repo itself.
+# All exclusions are files whose JOB is to describe or test the patterns;
+# scanning them with the very patterns they discuss is expected to fire
+# every time, and is not a real leak signal.
+
+version: 1
+
+ignore_paths:
+  # The taxonomy doc explicitly walks through every leak class with examples.
+  - docs/leak-classes.md
+  # The starter catalog itself contains the regex patterns and example prose
+  # in its descriptions.
+  - src/leakguard/data/starter-catalog.yaml
+  # The user-fillable template includes example values.
+  - src/leakguard/data/template.yaml
+  # Test fixtures are intentionally leaky/clean.
+  - tests/fixtures/leaky.md
+  - tests/fixtures/clean.md
+  # The README describes patterns when explaining what leakguard catches.
+  - README.md
+  # Build / package metadata (PKG-INFO embeds the README).
+  - src/leakguard.egg-info/**
+  - "**/*.egg-info/**"
+
+classes: []
