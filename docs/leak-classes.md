@@ -64,7 +64,7 @@ Each class below: what it is, why it leaks, an example, and the prevention rule 
 
 **What it catches**: timestamps like "3:23 AM," day-relative words like "today" / "tonight" / "yesterday."
 
-**Why it leaks**: late-night operator work makes timestamps decision-critical for distinguishing decisions. Day-relative words reveal the writer's frame of reference is the operator's calendar, not the project's history.
+**Why it leaks**: late-night operator work can make timestamps the evidence that distinguishes decisions. Day-relative words reveal the writer's frame of reference is the operator's calendar, not the project's history.
 
 **False positives**: legitimate technical uses ("today's typical client," "the next session of the protocol") will trip the patterns. Override on a case-by-case basis.
 
@@ -74,7 +74,7 @@ Each class below: what it is, why it leaks, an example, and the prevention rule 
 
 **What it catches**: "the user pushed back," "the user said X" framings.
 
-**Why it leaks**: ADR prose treats the operator's interventions as decision-critical decision context. They are, but in operator-private docs.
+**Why it leaks**: ADR prose treats the operator's interventions as part of the decision context. They are, but in operator-private docs.
 
 **Prevention**: present decisions on their own merits. "Direction was to ship the corpus immediately" not "the user pushed for shipping the corpus immediately."
 
