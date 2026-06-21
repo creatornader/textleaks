@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   scan:
-    uses: creatornader/oss-security-scan/.github/workflows/oss-security-scan.yml@v0.1.0
+    uses: creatornader/oss-security-scan/.github/workflows/oss-security-scan.yml@v0.2.0
     with:
       run-osv-scanner: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
 
@@ -31,7 +31,7 @@ jobs:
     name: textleaks scan (self-check)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
