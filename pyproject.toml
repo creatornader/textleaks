@@ -8,7 +8,7 @@ version = "0.2.0"
 description = "Pre-publish scanner for narrative-style internal-context leaks in public repos. The text-content companion to gitleaks."
 readme = "README.md"
 license = { text = "Apache-2.0" }
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [{ name = "Nader Helmy" }]
 keywords = ["pre-commit", "security", "leak", "audit", "oss", "scanner"]
 dependencies = ["pyyaml>=6"]
@@ -19,10 +19,10 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Security",
     "Topic :: Software Development :: Quality Assurance",
     "Topic :: Software Development :: Version Control :: Git",
